@@ -9,7 +9,11 @@ const StartScreen = ({ onStart, currentScore }) => (
     alignItems: 'center',
     gap: '0.75rem',
   }}>
-    <div style={{ fontSize: 'clamp(40px, 8vw, 64px)', lineHeight: 1 }}>🐸</div>
+    <img
+      src="/hakanjump9.png"
+      alt="Hakan Jump"
+      style={{ width: '250px', height: 'auto' }}
+    />
     <h2 style={{
       fontSize: 'clamp(22px, 4vw, 32px)',
       fontWeight: 700,

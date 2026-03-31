@@ -1,68 +1,138 @@
-🚀 Hakan Jump
-Hakan Jump, klasik Doodle Jump mekaniklerinden esinlenerek, modern web teknolojileriyle geliştirilmiş Full-Stack bir zıplama oyunudur. El çizimi (doodle) estetiği ile profesyonel yazılım mimarisini birleştirir.
+# 🕹️ Hakan Jump
 
-🎨 Özellikler
-Dinamik Oyun Motoru: Canvas API kullanılarak geliştirilmiş, akıcı karakter fiziği ve sonsuz platform üretimi.
+> Doodle Jump'tan ilham alınan, gerçek zamanlı skor tablosu ve 3 farklı Hakan karakteriyle dolu full-stack web oyunu.
 
-Canlı Lider Tablosu: Skorlar anlık olarak MongoDB Atlas üzerinde tutulur ve ilk 3 oyuncu madalyalarla (🥇, 🥈, 🥉) ödüllendirilir.
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=nodedotjs&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB)
+![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=flat&logo=mongodb&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat&logo=vite&logoColor=white)
+![Express](https://img.shields.io/badge/Express-000000?style=flat&logo=express&logoColor=white)
 
-Tam Responsive Tasarım: CSS Grid ve Medya Sorguları sayesinde telefon, tablet ve masaüstü cihazlarda kusursuz çalışır.
+---
 
-Güvenli Mimari: .env yapılandırması ve gelişmiş .gitignore kuralları ile hassas veriler (API anahtarları) koruma altındadır.
+## 🎮 Oyun Hakkında
 
-🛠️ Kullanılan Teknolojiler
-Frontend
-React.js: Bileşen tabanlı arayüz yönetimi.
+Mouse ile sağa sola hareket et, platformlara zıpla, ne kadar yüksek çıkabilirsin?  
+Skorum arttıkça **Güvenlik Hakanı → Mühendis Hakanı → Frontend Hakanı** olarak değişen 3 farklı karakter seni bekliyor.
 
-Canvas API: 2D oyun render işlemleri.
+| Skor | Karakter |
+|------|----------|
+| 0 – 999 | 🔒 Güvenlik Hakanı |
+| 1000 – 1999 | ⚙️ Mühendis Hakanı |
+| 2000+ | 💻 Frontend Hakanı |
 
-CSS3: "Doodle" defter teması ve mobil uyum.
+---
 
-Backend
-Node.js & Express: RESTful API mimarisi.
+## 📁 Proje Yapısı
 
-Mongoose: MongoDB için veri modelleme.
+```
+hakan-jump/
+├── backend/
+│   ├── models/
+│   ├── routes/
+│   ├── server.js
+│   └── .env
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── DoodleCanvas.jsx
+│   │   │   ├── StartScreen.jsx
+│   │   │   └── Leaderboard.jsx
+│   │   ├── services/
+│   │   │   └── scoreService.js
+│   │   ├── styles/
+│   │   │   └── global.css
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   └── package.json
+└── .gitignore
+```
 
-CORS & Dotenv: Güvenlik ve ortam değişkenleri yönetimi.
+---
 
-💻 Kurulum Rehberi
-Projeyi kendi yerel ortamınızda çalıştırmak için:
+## 🚀 Kurulum
 
-Depoyu Klonlayın:
+### Gereksinimler
 
-Bash
-git clone https://github.com/KULLANICI_ADIN/hakan-jump.git
+- Node.js v18+
+- MongoDB Atlas hesabı
+
+### 1. Repoyu klonla
+
+```bash
+git clone https://github.com/kullanici/hakan-jump.git
 cd hakan-jump
-Backend Hazırlığı:
+```
 
-Bash
+### 2. Backend
+
+```bash
 cd backend
 npm install
-backend klasörü içinde bir .env dosyası oluşturun:
+```
 
-Kod snippet'i
+`.env` dosyası oluştur:
+
+```env
 PORT=5000
-MONGO_URI=mongodb+srv://Kullanici:Sifre@cluster.xxxx.mongodb.net/hakanjump
-Frontend Hazırlığı:
+MONGO_URI=mongodb+srv://<kullanici_adi>:<sifre>@cluster.xxxx.mongodb.net/hakanjump
+```
 
-Bash
-cd ../frontend
+Sunucuyu başlat:
+
+```bash
+node server.js
+```
+
+### 3. Frontend
+
+Yeni terminal aç:
+
+```bash
+cd frontend
 npm install
 npm run dev
-🛡️ Güvenlik ve Kriz Yönetimi
-Bu projenin geliştirme aşamasında, yanlışlıkla sızdırılan veritabanı kimlik bilgileri GitHub Security Alert mekanizmaları kullanılarak başarıyla temizlenmiş; veritabanı şifreleri "Rotate" (Yenileme) işlemine tabi tutulmuş ve git rm --cached komutları ile repo geçmişinden arındırılmıştır. Bu süreç, projenin Siber Güvenlik farkındalığıyla geliştirildiğinin bir kanıtıdır.
+```
 
-👨‍💻 Geliştirici
-Hakan
-Full Stack Developer Adayı
+Tarayıcıdan aç → [http://localhost:5173](http://localhost:5173)
 
-"Kod yazarken yapılan her hata, aslında daha sağlam bir sistem kurmak için bir ipucudur." 🚀
+---
 
-🎮 Nasıl Oynanır?
-Masaüstü: Klavyedeki Sağ/Sol Ok tuşlarını kullanın.
+## 🕹️ Nasıl Oynanır?
 
-Mobil: Karakteri yönlendirmek için ekranın sağ veya sol tarafına dokunun.
+- **Mouse** ile karakteri sağa sola hareket ettir
+- Platformlara çarpınca otomatik zıpla
+- **🟩 Yeşil platform** → normal zıplama
+- **🟧 Turuncu platform** → süper zıplama (yay)
+- **⬜ Gri platform** → bir kez kullanılabilir, sonra kırılır
+- Düşersen oyun biter, skorunu kaydet ve leaderboard'a gir
 
-Hedef: Platformlardan düşmeden en yükseğe zıpla ve adını altın harflerle lider tablosuna yazdır!
+---
 
-Bu proje eğitim amaçlı geliştirilmiştir.
+## 🛠️ Kullanılan Teknolojiler
+
+**Frontend**
+- React + Vite
+- HTML5 Canvas (oyun motoru)
+- CSS (el çizimi / sketchbook estetik)
+
+**Backend**
+- Node.js + Express
+- MongoDB + Mongoose
+
+---
+
+## 📌 Geliştirme Amacı
+
+Bu proje aşağıdaki konularda pratik yapmak için geliştirilmiştir:
+
+- Full-stack uygulama geliştirme
+- Canvas API ile oyun programlama
+- REST API tasarımı ve MongoDB entegrasyonu
+- Responsive CSS layout
+
+---
+
+## 📜 Lisans
+
+MIT

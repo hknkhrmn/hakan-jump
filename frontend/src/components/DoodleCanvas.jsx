@@ -28,19 +28,34 @@ const PLAT_COLORS = {
   cracked: { stroke: '#6b6b6b', fill: '#d6d6d6' },
 };
 
-// ── Sabit oyun koordinat uzayı (tüm mantık bu boyuta göre) ───────────────────
+// ── Sabit oyun koordinat uzayı ────────────────────────────────────────────────
 const GAME_W = 350;
 const GAME_H = 550;
 
+// ── 3 Hakan karakteri ─────────────────────────────────────────────────────────
+const CHARACTERS = [
+  { src: '/hakan1.svg', label: '🔒 Güvenlik Hakanı',  minScore: 0    },
+  { src: '/hakan2.svg', label: '⚙️ Mühendis Hakanı',  minScore: 1000 },
+  { src: '/hakan3.svg', label: '💻 Frontend Hakanı',  minScore: 2000 },
+];
+
+const getCharIndex = (score) => {
+  if (score >= 2000) return 2;
+  if (score >= 1000) return 1;
+  return 0;
+};
+
 const DoodleCanvas = ({ onGameOver }) => {
-  const canvasRef    = useRef(null);
-  const wrapperRef   = useRef(null);
+  const canvasRef  = useRef(null);
+  const wrapperRef = useRef(null);
 
   const gs = useRef({
     player: { x: 140, y: 440, w: 36, h: 36, vy: 0 },
     platforms: [],
     score: 0,
     dead: false,
+    charIndex: 0,
+    labelFrames: 0,   // karakter değişim bildirimi için kalan frame sayısı
   });
 
   useEffect(() => {
@@ -48,20 +63,14 @@ const DoodleCanvas = ({ onGameOver }) => {
     const wrapper = wrapperRef.current;
     const ctx     = canvas.getContext('2d');
 
-    // ── Canvas piksel boyutunu container'a uydur ─────────────────────────────
-    // canvas.width/height = gerçek piksel = oyun koordinat uzayı
-    // CSS width/height = görsel boyut (responsive)
-    // İkisi ayrı! Oyun mantığı hep GAME_W × GAME_H üzerinde çalışır.
+    // ── Canvas boyutlandırma ─────────────────────────────────────────────────
     const resizeCanvas = () => {
       const containerW = wrapper.clientWidth;
-      // Oranı koru: GAME_H / GAME_W
       const containerH = Math.round(containerW * GAME_H / GAME_W);
       canvas.style.width  = `${containerW}px`;
       canvas.style.height = `${containerH}px`;
-      // Piksel boyutunu sabit tut — oyun koordinatları değişmez
       canvas.width  = GAME_W;
       canvas.height = GAME_H;
-      // Kağıt arka planı yeniden çiz (canvas sıfırlandı)
       drawPaper();
     };
 
@@ -85,9 +94,12 @@ const DoodleCanvas = ({ onGameOver }) => {
     };
     drawPaper();
 
-    // ── Oyuncu görseli ───────────────────────────────────────────────────────
-    const img = new Image();
-    img.src = '/me.png';
+    // ── 3 karakter görselini önceden yükle ──────────────────────────────────
+    const imgs = CHARACTERS.map(({ src }) => {
+      const img = new Image();
+      img.src = src;
+      return img;
+    });
 
     // ── Platform fabrikası ───────────────────────────────────────────────────
     const TYPES = ['normal','normal','normal','spring','cracked'];
@@ -99,8 +111,10 @@ const DoodleCanvas = ({ onGameOver }) => {
     });
 
     const reset = () => {
-      gs.current.score  = 0;
-      gs.current.dead   = false;
+      gs.current.score      = 0;
+      gs.current.dead       = false;
+      gs.current.charIndex  = 0;
+      gs.current.labelFrames = 0;
       gs.current.player = { x: 135, y: 440, w: 36, h: 36, vy: 0 };
       gs.current.platforms = [
         { x: 110, y: 490, w: 80, h: 10, type: 'normal' },
@@ -130,7 +144,6 @@ const DoodleCanvas = ({ onGameOver }) => {
     const drawPlat = (p) => {
       const { stroke, fill } = PLAT_COLORS[p.type];
       wobblyRect(ctx, p.x, p.y, p.w, p.h, stroke, fill);
-
       if (p.type === 'spring') {
         ctx.save();
         ctx.strokeStyle = '#9b2226';
@@ -145,7 +158,6 @@ const DoodleCanvas = ({ onGameOver }) => {
         }
         ctx.restore();
       }
-
       if (p.type === 'cracked') {
         ctx.save();
         ctx.strokeStyle = '#888';
@@ -160,37 +172,28 @@ const DoodleCanvas = ({ onGameOver }) => {
       }
     };
 
-    // ── Oyuncu çiz ───────────────────────────────────────────────────────────
+    // ── Oyuncu çiz (aktif karakterin görseli) ────────────────────────────────
     const drawPlayer = (p) => {
-      const cx = p.x + p.w / 2, cy = p.y + p.h / 2, r = p.w / 2;
+  const img = imgs[gs.current.charIndex];
 
-      if (img.complete && img.naturalWidth > 0) {
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(cx, cy, r, 0, Math.PI * 2);
-        ctx.clip();
-        ctx.drawImage(img, p.x, p.y, p.w, p.h);
-        ctx.restore();
-        ctx.save();
-        ctx.strokeStyle = '#1a1a1a';
-        ctx.lineWidth = 2.2;
-        ctx.beginPath();
-        ctx.arc(jitter(cx, 0.6), jitter(cy, 0.6), r + 1.5, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
-      } else {
-        ctx.save();
-        ctx.fillStyle = '#fff'; ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
-        ctx.fill(); ctx.stroke();
-        ctx.fillStyle = '#1a1a1a';
-        ctx.beginPath(); ctx.arc(cx - 5, cy - 3, 2.5, 0, Math.PI * 2); ctx.fill();
-        ctx.beginPath(); ctx.arc(cx + 5, cy - 3, 2.5, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.5;
-        ctx.beginPath(); ctx.arc(cx, cy + 2, 5, 0.15, Math.PI - 0.15); ctx.stroke();
-        ctx.restore();
-      }
-    };
+  if (img.complete && img.naturalWidth > 0) {
+    ctx.save();
+    
+    // YENİ: Sağa-Sola dönüş efekti (Hangi yöne giderse oraya baksın)
+    // Eğer karakterin hızı (vx) varsa kullanabilirsin, yoksa direkt çiz:
+    ctx.drawImage(img, p.x, p.y, p.w, p.h);
+    
+    ctx.restore();
+  } else {
+    // Fotoğraf yüklenene kadar veya hata verirse görünecek yedek (Fallback)
+    const cx = p.x + p.w / 2, cy = p.y + p.h / 2, r = p.w / 2;
+    ctx.save();
+    ctx.fillStyle = '#fff'; ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+    ctx.restore();
+  }
+};
 
     // ── Skor çiz ─────────────────────────────────────────────────────────────
     const drawScore = (score) => {
@@ -199,6 +202,45 @@ const DoodleCanvas = ({ onGameOver }) => {
       ctx.fillStyle = '#1a1a1a';
       ctx.fillText(`⭐ ${score}`, 36, 26);
       ctx.restore();
+    };
+
+    // ── Karakter değişim bildirimi ────────────────────────────────────────────
+    const drawCharLabel = () => {
+      const { charIndex, labelFrames } = gs.current;
+      if (labelFrames <= 0) return;
+
+      const label   = CHARACTERS[charIndex].label;
+      const alpha   = Math.min(labelFrames / 40, 1);  // ilk 40 frame fade-in
+      const fadeOut = Math.min(gs.current.labelFrames / 20, 1); // son 20 frame fade-out
+
+      ctx.save();
+      ctx.globalAlpha = Math.min(alpha, fadeOut);
+      ctx.textAlign = 'center';
+
+      // Arka plan bant
+      ctx.fillStyle = 'rgba(247,243,235,0.92)';
+      ctx.fillRect(0, GAME_H / 2 - 44, GAME_W, 52);
+
+      // Üst ve alt ince çizgi
+      ctx.strokeStyle = '#1a1a1a';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, GAME_H / 2 - 44); ctx.lineTo(GAME_W, GAME_H / 2 - 44); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, GAME_H / 2 + 8);  ctx.lineTo(GAME_W, GAME_H / 2 + 8);  ctx.stroke();
+
+      ctx.font = "bold 22px 'Caveat', cursive, sans-serif";
+      ctx.fillStyle = '#2d6a4f';
+      ctx.fillText('Karakter değişti!', GAME_W / 2, GAME_H / 2 - 18);
+
+      ctx.font = "18px 'Caveat', cursive, sans-serif";
+      ctx.fillStyle = '#1a1a1a';
+      ctx.fillText(label, GAME_W / 2, GAME_H / 2 + 2);
+
+      ctx.textAlign = 'left';
+      ctx.restore();
+
+      gs.current.labelFrames--;
     };
 
     // ── Game Over ────────────────────────────────────────────────────────────
@@ -225,11 +267,13 @@ const DoodleCanvas = ({ onGameOver }) => {
     const loop = () => {
       const { player: p, platforms } = gs.current;
 
+      // Fizik
       p.vy += 0.22;
       p.y  += p.vy;
       if (p.x + p.w < 0) p.x = GAME_W;
       if (p.x > GAME_W)   p.x = -p.w;
 
+      // Çarpışma
       platforms.forEach(pl => {
         if (
           p.vy > 0 &&
@@ -245,6 +289,7 @@ const DoodleCanvas = ({ onGameOver }) => {
         }
       });
 
+      // Kamera
       if (p.y < 200) {
         const delta = 200 - p.y;
         p.y = 200;
@@ -258,6 +303,14 @@ const DoodleCanvas = ({ onGameOver }) => {
         });
       }
 
+      // ── Karakter değişimi kontrolü ────────────────────────────────────────
+      const newCharIndex = getCharIndex(gs.current.score);
+      if (newCharIndex !== gs.current.charIndex) {
+        gs.current.charIndex  = newCharIndex;
+        gs.current.labelFrames = 120;  // ~2 saniye (60fps)
+      }
+
+      // Ölüm
       if (p.y > GAME_H + 60) {
         if (!gs.current.dead) {
           gs.current.dead = true;
@@ -267,6 +320,7 @@ const DoodleCanvas = ({ onGameOver }) => {
         return;
       }
 
+      // Render
       ctx.drawImage(paperCv, 0, 0);
       platforms.forEach(pl => { if (!(pl.broken > 1)) drawPlat(pl); });
 
@@ -283,18 +337,17 @@ const DoodleCanvas = ({ onGameOver }) => {
 
       drawPlayer(p);
       drawScore(gs.current.score);
+      drawCharLabel();  // karakter değişim bildirimi (varsa)
+
       animId = requestAnimationFrame(loop);
     };
 
-    // ── Mouse / touch: CSS piksel → oyun koordinatına çevir ─────────────────
-    // Kritik: canvas.getBoundingClientRect() CSS boyutunu verir,
-    // ama canvas.width oyun koordinat boyutu — oranı hesaba katmalıyız.
+    // ── Mouse / touch kontrolü ───────────────────────────────────────────────
     const toGameX = (clientX) => {
       const rect  = canvas.getBoundingClientRect();
-      const ratio = GAME_W / rect.width;           // CSS px → oyun px
+      const ratio = GAME_W / rect.width;
       return (clientX - rect.left) * ratio;
     };
-
     const onMouseMove = (e) => {
       gs.current.player.x = toGameX(e.clientX) - gs.current.player.w / 2;
     };
@@ -305,10 +358,10 @@ const DoodleCanvas = ({ onGameOver }) => {
       if (gs.current.dead) { reset(); loop(); }
     };
 
-    // ── ResizeObserver: container boyutu değişince canvas'ı güncelle ─────────
+    // ── ResizeObserver ───────────────────────────────────────────────────────
     const ro = new ResizeObserver(() => resizeCanvas());
     ro.observe(wrapper);
-    resizeCanvas(); // ilk boyutlandırma
+    resizeCanvas();
 
     window.addEventListener('mousemove', onMouseMove);
     canvas.addEventListener('touchmove', onTouch, { passive: true });
@@ -325,7 +378,6 @@ const DoodleCanvas = ({ onGameOver }) => {
   }, [onGameOver]);
 
   return (
-    // wrapper: container boyutunu ölçmek için referans noktası
     <div ref={wrapperRef} style={{ width: '100%', lineHeight: 0, fontSize: 0 }}>
       <canvas
         ref={canvasRef}

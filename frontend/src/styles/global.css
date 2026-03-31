@@ -1,0 +1,218 @@
+/* ─── Hakan Jump — Global Styles ─────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&display=swap');
+
+/* ── RESET ──────────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── ARKAPLAN & SAYFA ───────────────────────────────────────────────────── */
+.hj-root {
+  min-height: 100vh;
+  background-color: #eee8d8;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 31px,
+    rgba(160, 185, 210, 0.28) 31px,
+    rgba(160, 185, 210, 0.28) 32px
+  );
+  padding: 2rem 1.25rem 3rem;
+  font-family: 'Caveat', cursive;
+  position: relative;
+}
+
+/* Sol kırmızı defter çizgisi */
+.hj-root::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 48px;
+  width: 2px;
+  height: 100%;
+  background: rgba(210, 80, 80, 0.2);
+  pointer-events: none;
+}
+
+/* ── BAŞLIK ─────────────────────────────────────────────────────────────── */
+.hj-header {
+  text-align: center;
+  margin-bottom: 2.2rem;
+}
+
+.hj-title {
+  font-size: 60px;
+  font-weight: 700;
+  color: #1a1a1a;
+  display: inline-block;
+  position: relative;
+  transform: rotate(-1.2deg);
+}
+
+/* Yeşil altı çizgi */
+.hj-title::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  bottom: -4px;
+  width: 100%;
+  height: 4px;
+  background: #52b788;
+  transform: rotate(0.5deg);
+}
+
+/* ── ANA LAYOUT ─────────────────────────────────────────────────────────── */
+.hj-layout {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 1.5rem;
+  max-width: 760px;
+  margin: 0 auto;
+  align-items: start;
+}
+
+/* ── OYUN KARTI ─────────────────────────────────────────────────────────── */
+.hj-card {
+  background: #faf7f0;
+  border: 2px solid #1a1a1a;
+  border-radius: 3px;
+  box-shadow: 3px 4px 0 #c8c0b0;
+  position: relative;
+  overflow: hidden; /* canvas taşmasın */
+}
+
+/*
+ * Canvas aktifken direkt karta oturur.
+ * line-height / font-size: 0 → inline boşlukları yok eder.
+ */
+.hj-canvas-shell {
+  width: 100%;
+  overflow: hidden;
+  line-height: 0;
+  font-size: 0;
+}
+
+/* ── BUTON ──────────────────────────────────────────────────────────────── */
+.hj-btn {
+  font-family: 'Caveat', cursive;
+  font-size: 22px;
+  font-weight: 700;
+  color: #faf7f0;
+  background: #2d6a4f;
+  border: 2px solid #1a1a1a;
+  border-radius: 3px;
+  padding: 0.6rem 2.2rem;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 #1a1a1a;
+  transform: rotate(-0.8deg);
+  transition: transform 0.08s, box-shadow 0.08s;
+}
+
+.hj-btn:hover {
+  transform: rotate(-0.8deg) translateY(-2px);
+  box-shadow: 3px 5px 0 #1a1a1a;
+}
+
+.hj-btn:active {
+  transform: rotate(-0.8deg) translateY(1px);
+  box-shadow: 2px 2px 0 #1a1a1a;
+}
+
+/* ── SKOR KARTI ─────────────────────────────────────────────────────────── */
+.hj-score-card {
+  background: #faf7f0;
+  border: 2px solid #1a1a1a;
+  border-radius: 3px;
+  padding: 1rem;
+  box-shadow: 3px 4px 0 #c8c0b0;
+  margin-bottom: 1rem;
+}
+
+.hj-score-label {
+  font-size: 14px;
+  color: #999;
+  margin-bottom: 2px;
+}
+
+.hj-score-val {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1;
+}
+
+.hj-score-val.accent {
+  color: #2d6a4f;
+}
+
+/* ── LİDER TABLOSU ──────────────────────────────────────────────────────── */
+.hj-lb {
+  background: #faf7f0;
+  border: 2px solid #1a1a1a;
+  border-radius: 3px;
+  box-shadow: 3px 4px 0 #c8c0b0;
+  overflow: hidden;
+}
+
+.hj-lb-head {
+  border-bottom: 2px solid #1a1a1a;
+  padding: 0.6rem 1rem;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.hj-lb-list {
+  padding: 0.4rem 0.5rem;
+}
+
+.hj-lb-empty {
+  font-size: 16px;
+  color: #aaa;
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.hj-lb-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 10px;
+  border-bottom: 1px dashed #ddd;
+}
+
+.hj-lb-row:last-child {
+  border-bottom: none;
+}
+
+.hj-lb-name {
+  font-size: 17px;
+  color: #1a1a1a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hj-lb-score {
+  font-size: 17px;
+  font-weight: 700;
+  color: #2d6a4f;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+/* ── RESPONSIVE ─────────────────────────────────────────────────────────── */
+@media (max-width: 720px) {
+  .hj-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .hj-title {
+    font-size: 44px;
+  }
+}

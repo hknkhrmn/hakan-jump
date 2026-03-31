@@ -1,14 +1,37 @@
 import React from 'react';
 
 const StartScreen = ({ onStart, currentScore }) => (
-  <div style={{ padding: '3rem', textAlign: 'center' }}>
-    <div style={{ fontSize: '60px' }}>🐸</div>
-    <h2 style={{ fontSize: '32px', marginBottom: '10px' }}>Hazır mısın?</h2>
-    <p style={{ color: '#666', marginBottom: '20px' }}>Mouse ile sağa sola hareket et!</p>
+  <div style={{
+    padding: 'clamp(1.5rem, 4vw, 3rem)',
+    textAlign: 'center',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '0.75rem',
+  }}>
+    <div style={{ fontSize: 'clamp(40px, 8vw, 64px)', lineHeight: 1 }}>🐸</div>
+    <h2 style={{
+      fontSize: 'clamp(22px, 4vw, 32px)',
+      fontWeight: 700,
+      color: '#1a1a1a',
+    }}>
+      Hazır mısın?
+    </h2>
+    <p style={{
+      fontSize: 'clamp(14px, 2.5vw, 18px)',
+      color: '#666',
+    }}>
+      Mouse ile sağa sola hareket et!
+    </p>
     {currentScore !== null && (
-      <p style={{ fontSize: '20px', marginBottom: '20px' }}>Son Skor: <strong>{currentScore}</strong></p>
+      <p style={{
+        fontSize: 'clamp(16px, 2.5vw, 20px)',
+        color: '#1a1a1a',
+      }}>
+        Son Skor: <strong style={{ color: '#2d6a4f' }}>{currentScore}</strong>
+      </p>
     )}
-    <button className="hj-btn" onClick={onStart}>
+    <button className="hj-btn" onClick={onStart} style={{ marginTop: '0.5rem' }}>
       {currentScore !== null ? 'Tekrar Dene' : 'Başlat'}
     </button>
   </div>

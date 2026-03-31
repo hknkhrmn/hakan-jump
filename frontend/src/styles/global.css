@@ -2,7 +2,6 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&display=swap');
 
-/* ── RESET ──────────────────────────────────────────────────────────────── */
 *,
 *::before,
 *::after {
@@ -11,9 +10,17 @@
   padding: 0;
 }
 
-/* ── ARKAPLAN & SAYFA ───────────────────────────────────────────────────── */
+html, body, #root {
+  height: 100%;
+  overflow: hidden; /* scroll tamamen kapalı */
+  
+}
+
+/* ── SAYFA ───────────────────────────────────────────────────────────────── */
 .hj-root {
-  min-height: 100vh;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   background-color: #eee8d8;
   background-image: repeating-linear-gradient(
     0deg,
@@ -22,31 +29,30 @@
     rgba(160, 185, 210, 0.28) 31px,
     rgba(160, 185, 210, 0.28) 32px
   );
-  padding: 2rem 1.25rem 3rem;
   font-family: 'Caveat', cursive;
-  position: relative;
+  overflow: hidden;
+  padding: 0.75rem 1rem;
+  gap: 0.75rem;
 }
 
 /* Sol kırmızı defter çizgisi */
 .hj-root::before {
   content: '';
   position: fixed;
-  top: 0;
-  left: 48px;
-  width: 2px;
-  height: 100%;
+  top: 0; left: 48px;
+  width: 2px; height: 100%;
   background: rgba(210, 80, 80, 0.2);
   pointer-events: none;
 }
 
-/* ── BAŞLIK ─────────────────────────────────────────────────────────────── */
+/* ── BAŞLIK ──────────────────────────────────────────────────────────────── */
 .hj-header {
   text-align: center;
-  margin-bottom: 2.2rem;
+  flex-shrink: 0;
 }
 
 .hj-title {
-  font-size: 60px;
+  font-size: clamp(28px, 5vh, 52px);
   font-weight: 700;
   color: #1a1a1a;
   display: inline-block;
@@ -54,165 +60,227 @@
   transform: rotate(-1.2deg);
 }
 
-/* Yeşil altı çizgi */
 .hj-title::after {
   content: '';
   position: absolute;
-  left: 4px;
-  bottom: -4px;
-  width: 100%;
-  height: 4px;
+  left: 4px; bottom: -3px;
+  width: 100%; height: 3px;
   background: #52b788;
   transform: rotate(0.5deg);
 }
 
-/* ── ANA LAYOUT ─────────────────────────────────────────────────────────── */
+/* ── ANA LAYOUT ──────────────────────────────────────────────────────────── */
+/*
+ * Strateji:
+ *   - Layout kalan yüksekliği tamamen doldurur (flex: 1)
+ *   - Oyun kartı: canvas'ı barındırır, aspect-ratio canvas tarafından korunur
+ *   - Yan panel: oyun kartının yanında, kendi içinde scroll edebilir
+ *   - Mobilde: oyun üstte tam genişlik, yan panel altında yatay scroll
+ */
 .hj-layout {
-  display: grid;
-  grid-template-columns: 1fr 260px;
-  gap: 1.5rem;
-  max-width: 760px;
-  margin: 0 auto;
-  align-items: start;
+  flex: 1;
+  min-height: 0;          /* flex child shrink edebilsin */
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  align-items: flex-start;
+  overflow: hidden;
+  justify-content: center;
 }
 
-/* ── OYUN KARTI ─────────────────────────────────────────────────────────── */
+/* ── OYUN KARTI ──────────────────────────────────────────────────────────── */
 .hj-card {
   background: #faf7f0;
   border: 2px solid #1a1a1a;
   border-radius: 3px;
   box-shadow: 3px 4px 0 #c8c0b0;
-  position: relative;
-  overflow: hidden; /* canvas taşmasın */
+  overflow: hidden;
+  flex-shrink: 0;
+
+  /*
+   * Kart yüksekliği = layout yüksekliği (tüm boşluğu doldur)
+   * Genişlik = yükseklik × (GAME_W / GAME_H) = aspect-ratio ile otomatik
+   */
+  height: 100%;
+  width: auto;
+  aspect-ratio: 350 / 550;
 }
 
 /*
- * Canvas aktifken direkt karta oturur.
- * line-height / font-size: 0 → inline boşlukları yok eder.
+ * Canvas: kartı tamamen doldurur.
+ * width:100% + height:100% → aspect-ratio canvas'ın width/height
+ * attribute'larından (350×550) gelir, tarayıcı bunu korur.
  */
-.hj-canvas-shell {
+.hj-canvas {
+  display: block;
   width: 100%;
-  overflow: hidden;
-  line-height: 0;
-  font-size: 0;
+  height: 100%;
 }
 
-/* ── BUTON ──────────────────────────────────────────────────────────────── */
+/* Başlangıç ekranı da kartı doldursun */
+.hj-card > div {
+  height: 100%;
+}
+
+/* ── YAN PANEL ───────────────────────────────────────────────────────────── */
+.hj-side {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 180px;
+  max-width: 240px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;   /* panel taşarsa sadece panel içi kayar */
+  overflow-x: hidden;
+}
+
+/* ── BUTON ───────────────────────────────────────────────────────────────── */
 .hj-btn {
   font-family: 'Caveat', cursive;
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   color: #faf7f0;
   background: #2d6a4f;
   border: 2px solid #1a1a1a;
   border-radius: 3px;
-  padding: 0.6rem 2.2rem;
+  padding: 0.5rem 2rem;
   cursor: pointer;
   box-shadow: 3px 3px 0 #1a1a1a;
   transform: rotate(-0.8deg);
   transition: transform 0.08s, box-shadow 0.08s;
 }
 
-.hj-btn:hover {
-  transform: rotate(-0.8deg) translateY(-2px);
-  box-shadow: 3px 5px 0 #1a1a1a;
-}
+.hj-btn:hover  { transform: rotate(-0.8deg) translateY(-2px); box-shadow: 3px 5px 0 #1a1a1a; }
+.hj-btn:active { transform: rotate(-0.8deg) translateY(1px);  box-shadow: 2px 2px 0 #1a1a1a; }
 
-.hj-btn:active {
-  transform: rotate(-0.8deg) translateY(1px);
-  box-shadow: 2px 2px 0 #1a1a1a;
-}
-
-/* ── SKOR KARTI ─────────────────────────────────────────────────────────── */
+/* ── SKOR KARTI ──────────────────────────────────────────────────────────── */
 .hj-score-card {
   background: #faf7f0;
   border: 2px solid #1a1a1a;
   border-radius: 3px;
-  padding: 1rem;
+  padding: 0.6rem 0.85rem;
   box-shadow: 3px 4px 0 #c8c0b0;
-  margin-bottom: 1rem;
+  flex-shrink: 0;
 }
 
 .hj-score-label {
-  font-size: 14px;
+  font-size: 13px;
   color: #999;
-  margin-bottom: 2px;
+  margin-bottom: 1px;
 }
 
 .hj-score-val {
-  font-size: 32px;
+  font-size: clamp(20px, 2.5vw, 30px);
   font-weight: 700;
   color: #1a1a1a;
   line-height: 1;
 }
 
-.hj-score-val.accent {
-  color: #2d6a4f;
-}
+.hj-score-val.accent { color: #2d6a4f; }
 
-/* ── LİDER TABLOSU ──────────────────────────────────────────────────────── */
+/* ── LİDER TABLOSU ───────────────────────────────────────────────────────── */
 .hj-lb {
   background: #faf7f0;
   border: 2px solid #1a1a1a;
   border-radius: 3px;
   box-shadow: 3px 4px 0 #c8c0b0;
   overflow: hidden;
+  min-width: 0;
 }
 
 .hj-lb-head {
   border-bottom: 2px solid #1a1a1a;
-  padding: 0.6rem 1rem;
-  font-size: 20px;
+  padding: 0.4rem 0.75rem;
+  font-size: 17px;
   font-weight: 700;
   color: #1a1a1a;
 }
 
-.hj-lb-list {
-  padding: 0.4rem 0.5rem;
-}
+.hj-lb-list   { padding: 0.25rem 0.4rem; }
 
 .hj-lb-empty {
-  font-size: 16px;
+  font-size: 14px;
   color: #aaa;
   text-align: center;
-  padding: 2rem 1rem;
+  padding: 1.25rem 0.75rem;
 }
 
 .hj-lb-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 5px 10px;
+  padding: 3px 6px;
   border-bottom: 1px dashed #ddd;
+  min-width: 0;
 }
 
-.hj-lb-row:last-child {
-  border-bottom: none;
-}
+.hj-lb-row:last-child { border-bottom: none; }
 
 .hj-lb-name {
-  font-size: 17px;
+  font-size: 15px;
   color: #1a1a1a;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  flex: 1;
+  min-width: 0;
 }
 
 .hj-lb-score {
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 700;
   color: #2d6a4f;
   flex-shrink: 0;
-  margin-left: 8px;
+  margin-left: 4px;
 }
 
-/* ── RESPONSIVE ─────────────────────────────────────────────────────────── */
-@media (max-width: 720px) {
-  .hj-layout {
-    grid-template-columns: 1fr;
+/* ── MOBİL ───────────────────────────────────────────────────────────────── */
+/*
+ * Dar ekran (telefon):
+ *   - Layout dikey: oyun üstte, panel altta yatay scrollable şerit
+ *   - Oyun kartı genişliği = ekran genişliği, yükseklik aspect-ratio'dan
+ */
+@media (max-width: 600px) {
+  .hj-root {
+    padding: 0.5rem 0.5rem;
+    gap: 0.5rem;
   }
 
-  .hj-title {
-    font-size: 44px;
+  .hj-root::before { display: none; }
+
+  .hj-layout {
+    flex-direction: column;
+    align-items: stretch;
+    overflow: hidden;
+  }
+
+  /* Oyun kartı: tam genişlik, yükseklik aspect-ratio'dan otomatik */
+  .hj-card {
+    width: 100%;
+    height: auto;        /* yüksekliği aspect-ratio belirlesin */
+    aspect-ratio: 350 / 550;
+    flex-shrink: 0;
+  }
+
+  /* Alt şerit: skor + leaderboard yan yana, yatay scroll */
+  .hj-side {
+    flex-direction: row;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-shrink: 0;
+    padding-bottom: 4px; /* scrollbar için nefes */
+  }
+
+  .hj-score-card {
+    flex-shrink: 0;
+    min-width: 120px;
+  }
+
+  .hj-lb {
+    flex-shrink: 0;
+    min-width: 200px;
   }
 }

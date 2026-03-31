@@ -1,11 +1,11 @@
-const express = require('express');
-const router = express.Router();
-const scoreController = require('../controllers/scoreController');
+import { Router } from 'express';
+const router = Router();
+import { getScores, saveScore } from '../controllers/scoreController';
 
 // GET isteği gelirse skorları getir
-router.get('/', scoreController.getScores);
+router.get('/', getScores);
 
 // POST isteği gelirse yeni skor kaydet
-router.post('/', scoreController.saveScore);
+router.post('/', saveScore);
 
-module.exports = router;
+export default router;

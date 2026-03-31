@@ -26,7 +26,7 @@ const PLAT_COLORS = {
 };
 
 // Oyun mantığının çalıştığı sabit koordinat uzayı
-// CSS bunu ölçekler — JS hiç dokunmaz
+
 const GAME_W = 350;
 const GAME_H = 550;
 
@@ -63,7 +63,7 @@ const DoodleCanvas = ({ onGameOver }) => {
     canvas.width  = GAME_W;
     canvas.height = GAME_H;
 
-    // Kağıt arka plan — bir kez üret
+    // Kağıt arka plan 
     const paperCv  = document.createElement('canvas');
     paperCv.width  = GAME_W;
     paperCv.height = GAME_H;
@@ -86,7 +86,7 @@ const DoodleCanvas = ({ onGameOver }) => {
       return img;
     });
 
-    // Platform fabrikası
+    // Platformlar
     const TYPES   = ['normal', 'normal', 'normal', 'spring', 'cracked'];
     const makePlat = (x, y) => ({
       x, y,
@@ -293,7 +293,7 @@ const DoodleCanvas = ({ onGameOver }) => {
       animId = requestAnimationFrame(loop);
     };
 
-    // Mouse/touch: CSS px → oyun koordinatı
+    // Mouse/touch: CSS px  oyun koordinatı
     const toGameX = (clientX) => {
       const rect  = canvas.getBoundingClientRect();
       const ratio = GAME_W / rect.width;
@@ -317,12 +317,6 @@ const DoodleCanvas = ({ onGameOver }) => {
   }, [onGameOver]);
 
   return (
-    /*
-     * canvas'a sadece display:block ver.
-     * Tüm boyutlandırma global.css'teki .hj-canvas sınıfı halleder:
-     *   width: 100%  →  kartın tüm genişliğini kapla
-     *   aspect-ratio →  yüksekliği otomatik koru, JS yok
-     */
     <canvas
       ref={canvasRef}
       className="hj-canvas"

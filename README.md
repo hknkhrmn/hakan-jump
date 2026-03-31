@@ -71,12 +71,6 @@ cd backend
 npm install
 ```
 
-`.env` dosyası oluştur:
-
-```env
-PORT=5000
-MONGO_URI=mongodb+srv://<kullanici_adi>:<sifre>@cluster.xxxx.mongodb.net/hakanjump
-```
 
 Sunucuyu başlat:
 

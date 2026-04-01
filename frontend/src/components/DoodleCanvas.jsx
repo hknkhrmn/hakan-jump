@@ -94,7 +94,7 @@ const DoodleCanvas = ({ onGameOver }) => {
       gs.current.dead        = false;
       gs.current.charIndex   = 0;
       gs.current.labelFrames = 0;
-      gs.current.player      = { x: 135, y: 440, w: 36, h: 36, vy: 0 };
+      gs.current.player      = { x: 135, y: 420, w: 75, h: 75, vy: 0 };
       gs.current.platforms   = [
         { x: 110, y: 490, w: 80, h: 10, type: 'normal' },
         ...Array.from({ length: 6 }, (_, i) =>

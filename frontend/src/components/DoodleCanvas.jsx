@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react';
+import { bgMusic, bounceSound, fallSound } from '../utils/audio';
 
 const jitter = (n, a = 1.8) => n + (Math.random() - 0.5) * a;
 
@@ -24,8 +25,6 @@ const PLAT_COLORS = {
   spring:  { stroke: '#b5451b', fill: '#f4a261' },
   cracked: { stroke: '#6b6b6b', fill: '#d6d6d6' },
 };
-
-// Oyun mantığının çalıştığı sabit koordinat uzayı
 
 const GAME_W = 350;
 const GAME_H = 550;
@@ -58,12 +57,9 @@ const DoodleCanvas = ({ onGameOver }) => {
     const canvas = canvasRef.current;
     const ctx    = canvas.getContext('2d');
 
-    // canvas.width/height = oyun koordinat uzayı (sabit)
-    // CSS width/height    = ekrandaki görsel boyut (global.css halleder)
     canvas.width  = GAME_W;
     canvas.height = GAME_H;
 
-    // Kağıt arka plan 
     const paperCv  = document.createElement('canvas');
     paperCv.width  = GAME_W;
     paperCv.height = GAME_H;
@@ -79,14 +75,12 @@ const DoodleCanvas = ({ onGameOver }) => {
     pCtx.lineWidth   = 1.5;
     pCtx.beginPath(); pCtx.moveTo(30, 0); pCtx.lineTo(30, GAME_H); pCtx.stroke();
 
-    // Karakter görselleri
     const imgs = CHARACTERS.map(({ src }) => {
       const img = new Image();
       img.src = src;
       return img;
     });
 
-    // Platformlar
     const TYPES   = ['normal', 'normal', 'normal', 'spring', 'cracked'];
     const makePlat = (x, y) => ({
       x, y,
@@ -110,7 +104,6 @@ const DoodleCanvas = ({ onGameOver }) => {
     };
     reset();
 
-    // Parçacıklar
     const particles = [];
     const burst = (x, y, color) => {
       for (let i = 0; i < 6; i++) {
@@ -221,6 +214,15 @@ const DoodleCanvas = ({ onGameOver }) => {
       ctx.restore();
     };
 
+    const startBgMusic = () => {
+      if (bgMusic.paused) {
+        bgMusic.currentTime = 0;
+        bgMusic.play().catch(e => console.warn('Müzik başlatılamadı:', e));
+      } else {
+        bgMusic.currentTime = 0;
+      }
+    };
+
     let animId;
     const loop = () => {
       const { player: p, platforms } = gs.current;
@@ -242,6 +244,10 @@ const DoodleCanvas = ({ onGameOver }) => {
           }
           p.vy = pl.type === 'spring' ? -14 : -9;
           burst(p.x + p.w / 2, pl.y, PLAT_COLORS[pl.type].stroke);
+          
+          // Zıplama sesi
+          bounceSound.currentTime = 0;
+          bounceSound.play().catch(e => console.warn('Bounce sesi çalınamadı:', e));
         }
       });
 
@@ -267,6 +273,9 @@ const DoodleCanvas = ({ onGameOver }) => {
       if (p.y > GAME_H + 60) {
         if (!gs.current.dead) {
           gs.current.dead = true;
+          fallSound.currentTime = 0;
+          fallSound.play().catch(e => console.warn('Fall sesi çalınamadı:', e));
+          bgMusic.pause();
           drawGameOver(gs.current.score);
           onGameOver(gs.current.score);
         }
@@ -293,7 +302,6 @@ const DoodleCanvas = ({ onGameOver }) => {
       animId = requestAnimationFrame(loop);
     };
 
-    // Mouse/touch: CSS px  oyun koordinatı
     const toGameX = (clientX) => {
       const rect  = canvas.getBoundingClientRect();
       const ratio = GAME_W / rect.width;
@@ -301,11 +309,19 @@ const DoodleCanvas = ({ onGameOver }) => {
     };
     const onMouseMove = (e) => { gs.current.player.x = toGameX(e.clientX) - gs.current.player.w / 2; };
     const onTouch     = (e) => { gs.current.player.x = toGameX(e.touches[0].clientX) - gs.current.player.w / 2; };
-    const onClick     = ()  => { if (gs.current.dead) { reset(); loop(); } };
+    const onClick     = ()  => { 
+      if (gs.current.dead) { 
+        reset(); 
+        startBgMusic(); 
+        loop(); 
+      } 
+    };
 
     window.addEventListener('mousemove', onMouseMove);
     canvas.addEventListener('touchmove', onTouch, { passive: true });
     canvas.addEventListener('click', onClick);
+    
+    startBgMusic();
     loop();
 
     return () => {
@@ -313,6 +329,7 @@ const DoodleCanvas = ({ onGameOver }) => {
       canvas.removeEventListener('touchmove', onTouch);
       canvas.removeEventListener('click', onClick);
       cancelAnimationFrame(animId);
+      bgMusic.pause();
     };
   }, [onGameOver]);
 

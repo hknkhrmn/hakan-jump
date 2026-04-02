@@ -12,8 +12,8 @@
 
 ## 🎮 Oyun Hakkında
 
-Mouse ile sağa sola hareket et, platformlara zıpla, ne kadar yüksek çıkabilirsin?  
-Skorum arttıkça **Güvenlik Hakanı → Mühendis Hakanı → Frontend Hakanı** olarak değişen 3 farklı karakter seni bekliyor.
+Platformlara zıpla, ne kadar yüksek çıkabilirsin?  
+Skor arttıkça karakter değişir — 3 farklı Hakan seni bekliyor.
 
 | Skor | Karakter |
 |------|----------|
@@ -29,23 +29,41 @@ Skorum arttıkça **Güvenlik Hakanı → Mühendis Hakanı → Frontend Hakanı
 hakan-jump/
 ├── backend/
 │   ├── models/
+│   │   └── Score.js
 │   ├── routes/
+│   │   └── scoreRoutes.js
+│   ├── controllers/
+│   │   └── scoreController.js
 │   ├── server.js
 │   └── .env
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── DoodleCanvas.jsx
-│   │   │   ├── StartScreen.jsx
-│   │   │   └── Leaderboard.jsx
-│   │   ├── services/
-│   │   │   └── scoreService.js
-│   │   ├── styles/
-│   │   │   └── global.css
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   └── package.json
-└── .gitignore
+│
+└── frontend/
+    ├── public/
+    │   └── assets/
+    │       ├── bg-music.mp3
+    │       ├── bounce.mp3
+    │       ├── fall.mp3
+    │       ├── hakan1.svg
+    │       ├── hakan2.svg
+    │       ├── hakan3.svg
+    │       └── hakanjump9.png
+    ├── src/
+    │   ├── components/
+    │   │   ├── DoodleCanvas.jsx
+    │   │   ├── Leaderboard.jsx
+    │   │   └── StartScreen.jsx
+    │   ├── services/
+    │   │   └── scoreService.js
+    │   ├── styles/
+    │   │   └── global.css
+    │   ├── utils/
+    │   │   └── audio.js
+    │   ├── App.jsx
+    │   └── main.jsx
+    ├── index.html
+    ├── vite.config.js
+    ├── eslint.config.js
+    └── package.json
 ```
 
 ---
@@ -71,7 +89,6 @@ cd backend
 npm install
 ```
 
-
 Sunucuyu başlat:
 
 ```bash
@@ -94,12 +111,20 @@ Tarayıcıdan aç → [http://localhost:5173](http://localhost:5173)
 
 ## 🕹️ Nasıl Oynanır?
 
-- **Mouse** ile karakteri sağa sola hareket ettir
-- Platformlara çarpınca otomatik zıpla
-- **🟩 Yeşil platform** → normal zıplama
-- **🟧 Turuncu platform** → süper zıplama (yay)
-- **⬜ Gri platform** → bir kez kullanılabilir, sonra kırılır
-- Düşersen oyun biter, skorunu kaydet ve leaderboard'a gir
+**Masaüstü**
+- `A` / `←` → sola git
+- `D` / `→` → sağa git
+
+**Mobil**
+- Telefonu sağa / sola eğ (gyroscope)
+- Gyroscope yoksa ekranın sol / sağ yarısına dokun
+
+**Platform tipleri**
+- 🟩 Yeşil → standart zıplama
+- 🟧 Turuncu → süper zıplama (yay)
+- ⬜ Gri → bir kez kullanılabilir, sonra kırılır
+
+Düşersen oyun biter — skorunu gir, lider tablosuna kaydol.
 
 ---
 
@@ -108,7 +133,7 @@ Tarayıcıdan aç → [http://localhost:5173](http://localhost:5173)
 **Frontend**
 - React + Vite
 - HTML5 Canvas (oyun motoru)
-- CSS (el çizimi / sketchbook estetik)
+- CSS (el çizimi / sketchbook estetik, Caveat fontu)
 
 **Backend**
 - Node.js + Express
@@ -124,6 +149,7 @@ Bu proje aşağıdaki konularda pratik yapmak için geliştirilmiştir:
 - Canvas API ile oyun programlama
 - REST API tasarımı ve MongoDB entegrasyonu
 - Responsive CSS layout
+- Gyroscope ve klavye kontrol sistemleri
 
 ---
 

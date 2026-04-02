@@ -25,7 +25,8 @@ const StartScreen = ({ onStart, currentScore }) => (
       fontSize: 'clamp(14px, 2.5vw, 18px)',
       color: '#666',
     }}>
-      Mouse ile sağa sola hareket et!
+      A-D yada ok tuşlarıyla sağa sola hareket et!
+      Telefondaysan sağa sola yatır!
     </p>
     {currentScore !== null && (
       <p style={{

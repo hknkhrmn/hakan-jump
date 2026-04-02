@@ -7,18 +7,19 @@ import StartScreen from './components/StartScreen';
 import Leaderboard from './components/Leaderboard';
 
 function App() {
-  const [leaderboard, setLeaderboard]   = useState([]);
-  const [gameStarted, setGameStarted]   = useState(false);
-  const [currentScore, setCurrentScore] = useState(null);
-  const [highScore, setHighScore]       = useState(0);
+  const [leaderboard, setLeaderboard]   = useState([]); // skor tablosu verisi
+  const [gameStarted, setGameStarted]   = useState(false); // oyun aktif mi 
+  const [currentScore, setCurrentScore] = useState(null); // son oyun skoru 
+  const [highScore, setHighScore]       = useState(0); // oturumdaki en yüksek skor
 
+  // Uygulama açılınca skor tablosunu backend den çeker
   useEffect(() => {
 
     let isMounted = true;
     const fetchData = async () => {
       try {
         const data = await scoreService.getScores();
-        if (isMounted) setLeaderboard(data);
+        if (isMounted) setLeaderboard(data); // component hala mountdaysa state i güncelle 
       } catch (e) {
         console.error('Skorlar yüklenemedi:', e);
       }
@@ -27,6 +28,7 @@ function App() {
     return () => { isMounted = false; };
   }, []);
 
+  // Oyun bitince skoru kaydet tabloyu güncelle
   const handleGameOver = useCallback(async (score) => {
     setGameStarted(false);
     setCurrentScore(score);
@@ -51,7 +53,7 @@ function App() {
       </div>
       <div className="hj-layout">
 
-        {/* ── OYUN KARTI ── */}
+        {/* Oyun Kartı */}
         <div className="hj-card">
           {!gameStarted ? (
             <StartScreen
@@ -65,7 +67,7 @@ function App() {
           )}
         </div>
 
-        {/* ── YAN PANEL ── */}
+        {/* Yan Panel */}
         <div className="hj-side">
           <div className="hj-score-card">
             <div className="hj-score-label">en yüksek</div>

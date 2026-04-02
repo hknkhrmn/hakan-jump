@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = ' https://hakan-jump.onrender.com/api';
+const API_URL = 'https://hakan-jump.onrender.com/api';
 
 export const scoreService = {
   getScores: async () => {

@@ -33,14 +33,13 @@ const PLAT_COLORS = {
 const GAME_W = 350;
 const GAME_H = 550;
 
-// 3 Hakan karakteri ve hangi skorda devreye girdikleri
+// 3 Hakan karakteri
 const CHARACTERS = [
   { src: '/hakan1.svg', label: '🔒 Güvenlik Hakanı', minScore: 0    },
   { src: '/hakan2.svg', label: '⚙️ Mühendis Hakanı', minScore: 1000 },
   { src: '/hakan3.svg', label: '💻 Frontend Hakanı', minScore: 2000 },
 ];
 
-// Skora göre aktif karakter indeksini döner
 const getCharIndex = (score) => {
   if (score >= 2000) return 2;
   if (score >= 1000) return 1;
@@ -49,6 +48,8 @@ const getCharIndex = (score) => {
 
 const DoodleCanvas = ({ onGameOver }) => {
   const canvasRef = useRef(null);
+  const containerRef = useRef(null);
+
   const gs = useRef({
     player: { x: 135, y: 420, w: 75, h: 75, vy: 0, vx: 0 },
     platforms: [],
@@ -58,27 +59,34 @@ const DoodleCanvas = ({ onGameOver }) => {
     labelFrames: 0,
   });
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx    = canvas.getContext('2d');
+  // Dokunmatik kontrol için değişkenler
+  const touchState = useRef({
+    isTouching: false,
+    lastX: 0,
+    sensitivity: 0.15,
+  });
 
-    canvas.width  = GAME_W;
-    canvas.height = GAME_H;
+  useEffect(() => {
+    const canvasElement = canvasRef.current;
+    const ctx = canvasElement.getContext('2d');
+
+    canvasElement.width = GAME_W;
+    canvasElement.height = GAME_H;
 
     // Kağıt arka planı
-    const paperCv  = document.createElement('canvas');
-    paperCv.width  = GAME_W;
+    const paperCv = document.createElement('canvas');
+    paperCv.width = GAME_W;
     paperCv.height = GAME_H;
-    const pCtx     = paperCv.getContext('2d');
+    const pCtx = paperCv.getContext('2d');
     pCtx.fillStyle = '#f7f3eb';
     pCtx.fillRect(0, 0, GAME_W, GAME_H);
     for (let ly = 32; ly < GAME_H; ly += 32) {
       pCtx.strokeStyle = 'rgba(160,185,210,0.30)';
-      pCtx.lineWidth   = 0.7;
+      pCtx.lineWidth = 0.7;
       pCtx.beginPath(); pCtx.moveTo(0, ly); pCtx.lineTo(GAME_W, ly); pCtx.stroke();
     }
     pCtx.strokeStyle = 'rgba(210,90,90,0.22)';
-    pCtx.lineWidth   = 1.5;
+    pCtx.lineWidth = 1.5;
     pCtx.beginPath(); pCtx.moveTo(30, 0); pCtx.lineTo(30, GAME_H); pCtx.stroke();
 
     const imgs = CHARACTERS.map(({ src }) => {
@@ -87,7 +95,7 @@ const DoodleCanvas = ({ onGameOver }) => {
       return img;
     });
 
-    const TYPES    = ['normal', 'normal', 'normal', 'spring', 'cracked'];
+    const TYPES = ['normal', 'normal', 'normal', 'spring', 'cracked'];
     const makePlat = (x, y) => ({
       x, y,
       w: 52 + Math.random() * 22,
@@ -96,12 +104,12 @@ const DoodleCanvas = ({ onGameOver }) => {
     });
 
     const reset = () => {
-      gs.current.score       = 0;
-      gs.current.dead        = false;
-      gs.current.charIndex   = 0;
+      gs.current.score = 0;
+      gs.current.dead = false;
+      gs.current.charIndex = 0;
       gs.current.labelFrames = 0;
-      gs.current.player      = { x: 135, y: 420, w: 75, h: 75, vy: 0, vx: 0 };
-      gs.current.platforms   = [
+      gs.current.player = { x: 135, y: 420, w: 75, h: 75, vy: 0, vx: 0 };
+      gs.current.platforms = [
         { x: 110, y: 490, w: 80, h: 10, type: 'normal' },
         ...Array.from({ length: 6 }, (_, i) =>
           makePlat(20 + Math.random() * (GAME_W - 90), 400 - i * 80)
@@ -131,8 +139,8 @@ const DoodleCanvas = ({ onGameOver }) => {
       if (p.type === 'spring') {
         ctx.save();
         ctx.strokeStyle = '#9b2226';
-        ctx.lineWidth   = 1.5;
-        ctx.lineCap     = 'round';
+        ctx.lineWidth = 1.5;
+        ctx.lineCap = 'round';
         const cx = p.x + p.w / 2;
         for (let i = 0; i < 4; i++) {
           ctx.beginPath();
@@ -146,10 +154,10 @@ const DoodleCanvas = ({ onGameOver }) => {
       if (p.type === 'cracked') {
         ctx.save();
         ctx.strokeStyle = '#888';
-        ctx.lineWidth   = 1;
+        ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(p.x + p.w * 0.35, p.y); ctx.lineTo(p.x + p.w * 0.45, p.y + p.h);
-        ctx.moveTo(p.x + p.w * 0.6,  p.y); ctx.lineTo(p.x + p.w * 0.52, p.y + p.h);
+        ctx.moveTo(p.x + p.w * 0.6, p.y); ctx.lineTo(p.x + p.w * 0.52, p.y + p.h);
         ctx.stroke();
         ctx.restore();
       }
@@ -158,41 +166,40 @@ const DoodleCanvas = ({ onGameOver }) => {
     const drawPlayer = (p) => {
       const img = imgs[gs.current.charIndex];
       if (img.complete && img.naturalWidth > 0) {
-        ctx.save();
         ctx.drawImage(img, p.x, p.y, p.w, p.h);
-        ctx.restore();
       } else {
         const cx = p.x + p.w / 2, cy = p.y + p.h / 2, r = p.w / 2;
-        ctx.save();
-        ctx.fillStyle = '#fff'; ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
-        ctx.fill(); ctx.stroke();
-        ctx.restore();
+        ctx.fillStyle = '#fff';
+        ctx.strokeStyle = '#1a1a1a';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
       }
     };
 
     const drawScore = (score) => {
-      ctx.save();
-      ctx.font      = "bold 18px 'Caveat', cursive, sans-serif";
+      ctx.font = "bold 18px 'Caveat', cursive, sans-serif";
       ctx.fillStyle = '#1a1a1a';
       ctx.fillText(`⭐ ${score}`, 36, 26);
-      ctx.restore();
     };
 
     const drawCharLabel = () => {
       const { charIndex, labelFrames } = gs.current;
       if (labelFrames <= 0) return;
-      const label   = CHARACTERS[charIndex].label;
-      const alpha   = Math.min(labelFrames / 40, 1);
+      const label = CHARACTERS[charIndex].label;
+      const alpha = Math.min(labelFrames / 40, 1);
       const fadeOut = Math.min(labelFrames / 20, 1);
       ctx.save();
       ctx.globalAlpha = Math.min(alpha, fadeOut);
-      ctx.textAlign   = 'center';
+      ctx.textAlign = 'center';
       ctx.fillStyle = 'rgba(247,243,235,0.92)';
       ctx.fillRect(0, GAME_H / 2 - 44, GAME_W, 52);
-      ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1;
+      ctx.strokeStyle = '#1a1a1a';
+      ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(0, GAME_H / 2 - 44); ctx.lineTo(GAME_W, GAME_H / 2 - 44); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(0, GAME_H / 2 + 8);  ctx.lineTo(GAME_W, GAME_H / 2 + 8);  ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, GAME_H / 2 + 8); ctx.lineTo(GAME_W, GAME_H / 2 + 8); ctx.stroke();
       ctx.font = "bold 22px 'Caveat', cursive, sans-serif";
       ctx.fillStyle = '#2d6a4f';
       ctx.fillText('Karakter değişti!', GAME_W / 2, GAME_H / 2 - 18);
@@ -207,19 +214,17 @@ const DoodleCanvas = ({ onGameOver }) => {
     const drawGameOver = (score) => {
       ctx.drawImage(paperCv, 0, 0);
       wobblyRect(ctx, 38, GAME_H / 2 - 64, GAME_W - 76, 130, '#1a1a1a', 'rgba(247,243,235,0.96)');
-      ctx.save();
       ctx.textAlign = 'center';
-      ctx.font      = "bold 26px 'Caveat', cursive, sans-serif";
+      ctx.font = "bold 26px 'Caveat', cursive, sans-serif";
       ctx.fillStyle = '#e63946';
       ctx.fillText('Oyun Bitti!', GAME_W / 2, GAME_H / 2 - 22);
-      ctx.font      = "20px 'Caveat', cursive, sans-serif";
+      ctx.font = "20px 'Caveat', cursive, sans-serif";
       ctx.fillStyle = '#1a1a1a';
       ctx.fillText(`Skor: ${score}`, GAME_W / 2, GAME_H / 2 + 10);
-      ctx.font      = "14px 'Caveat', cursive, sans-serif";
+      ctx.font = "14px 'Caveat', cursive, sans-serif";
       ctx.fillStyle = '#555';
       ctx.fillText('(yeniden başlamak için tıkla)', GAME_W / 2, GAME_H / 2 + 40);
       ctx.textAlign = 'left';
-      ctx.restore();
     };
 
     const startBgMusic = async () => {
@@ -237,10 +242,18 @@ const DoodleCanvas = ({ onGameOver }) => {
 
       p.x += p.vx;
       p.vy += 0.22;
-      p.y  += p.vy;
+      p.y += p.vy;
 
-      if (p.x + p.w < 0)  p.x = GAME_W;
-      if (p.x > GAME_W)   p.x = -p.w;
+      if (p.vx > 5) p.vx = 5;
+      if (p.vx < -5) p.vx = -5;
+      
+      if (!touchState.current.isTouching) {
+        p.vx *= 0.98;
+        if (Math.abs(p.vx) < 0.1) p.vx = 0;
+      }
+
+      if (p.x + p.w < 0) p.x = GAME_W;
+      if (p.x > GAME_W) p.x = -p.w;
 
       platforms.forEach(pl => {
         if (
@@ -274,7 +287,7 @@ const DoodleCanvas = ({ onGameOver }) => {
 
       const newCharIndex = getCharIndex(gs.current.score);
       if (newCharIndex !== gs.current.charIndex) {
-        gs.current.charIndex   = newCharIndex;
+        gs.current.charIndex = newCharIndex;
         gs.current.labelFrames = 120;
       }
 
@@ -295,15 +308,20 @@ const DoodleCanvas = ({ onGameOver }) => {
 
       for (let i = particles.length - 1; i >= 0; i--) {
         const pt = particles[i];
-        pt.x += pt.vx; pt.y += pt.vy;
+        pt.x += pt.vx;
+        pt.y += pt.vy;
         pt.vy += 0.1;
         pt.life -= 0.065;
-        if (pt.life <= 0) { particles.splice(i, 1); continue; }
-        ctx.save();
+        if (pt.life <= 0) {
+          particles.splice(i, 1);
+          continue;
+        }
         ctx.globalAlpha = pt.life;
-        ctx.fillStyle   = pt.color;
-        ctx.beginPath(); ctx.arc(pt.x, pt.y, pt.r, 0, Math.PI * 2); ctx.fill();
-        ctx.restore();
+        ctx.fillStyle = pt.color;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, pt.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
       }
 
       drawPlayer(p);
@@ -312,10 +330,37 @@ const DoodleCanvas = ({ onGameOver }) => {
       animId = requestAnimationFrame(loop);
     };
 
-    // ── KONTROLLER ────────────────────────────────────────────────────────────
+    // ── DOKUNMATİK KONTROL ─────────────────────────────────────────────
+    const handleTouchStart = (e) => {
+      e.preventDefault();
+      touchState.current.isTouching = true;
+      touchState.current.lastX = e.touches[0].clientX;
+    };
+
+    const handleTouchMove = (e) => {
+      e.preventDefault();
+      if (!touchState.current.isTouching) return;
+      
+      const currentX = e.touches[0].clientX;
+      const deltaX = currentX - touchState.current.lastX;
+      
+      gs.current.player.vx += deltaX * touchState.current.sensitivity;
+      
+      if (gs.current.player.vx > 6) gs.current.player.vx = 6;
+      if (gs.current.player.vx < -6) gs.current.player.vx = -6;
+      
+      touchState.current.lastX = currentX;
+    };
+
+    const handleTouchEnd = (e) => {
+      e.preventDefault();
+      touchState.current.isTouching = false;
+    };
+
+    // ── MASAÜSTÜ KONTROL ──────────────────────────────────────────────
     const onKeyDown = (e) => {
-      if (e.key === 'ArrowLeft'  || e.key === 'a') gs.current.player.vx = -5;
-      if (e.key === 'ArrowRight' || e.key === 'd') gs.current.player.vx =  5;
+      if (e.key === 'ArrowLeft' || e.key === 'a') gs.current.player.vx = -5;
+      if (e.key === 'ArrowRight' || e.key === 'd') gs.current.player.vx = 5;
     };
     const onKeyUp = (e) => {
       if (['ArrowLeft', 'ArrowRight', 'a', 'd'].includes(e.key)) {
@@ -331,90 +376,54 @@ const DoodleCanvas = ({ onGameOver }) => {
       }
     };
 
+    // Event listener'lar
+    canvasElement.addEventListener('touchstart', handleTouchStart, { passive: false });
+    canvasElement.addEventListener('touchmove', handleTouchMove, { passive: false });
+    canvasElement.addEventListener('touchend', handleTouchEnd);
     window.addEventListener('keydown', onKeyDown);
-    window.addEventListener('keyup',   onKeyUp);
-    canvas.addEventListener('click', onClick);
+    window.addEventListener('keyup', onKeyUp);
+    canvasElement.addEventListener('click', onClick);
 
     startBgMusic();
     loop();
 
     return () => {
+      canvasElement.removeEventListener('touchstart', handleTouchStart);
+      canvasElement.removeEventListener('touchmove', handleTouchMove);
+      canvasElement.removeEventListener('touchend', handleTouchEnd);
       window.removeEventListener('keydown', onKeyDown);
-      window.removeEventListener('keyup',   onKeyUp);
-      canvas.removeEventListener('click', onClick);
+      window.removeEventListener('keyup', onKeyUp);
+      canvasElement.removeEventListener('click', onClick);
       cancelAnimationFrame(animId);
       bgMusic.pause();
     };
   }, [onGameOver]);
 
-  // ── MOBİL KONTROLLER (useEffect DIŞINDA) ────────────────────────────────────
-  const handleTouchStartLeft = (e) => {
-    e.preventDefault();
-    if (gs.current) gs.current.player.vx = -5;
-  };
-
-  const handleTouchStartRight = (e) => {
-    e.preventDefault();
-    if (gs.current) gs.current.player.vx = 5;
-  };
-
-  const handleTouchEnd = (e) => {
-    e.preventDefault();
-    if (gs.current) gs.current.player.vx = 0;
-  };
-
-  // Masaüstü fare desteği
-  const handleMouseDownLeft = (e) => {
-    e.preventDefault();
-    if (gs.current) gs.current.player.vx = -5;
-  };
-
-  const handleMouseDownRight = (e) => {
-    e.preventDefault();
-    if (gs.current) gs.current.player.vx = 5;
-  };
-
-  const handleMouseUp = (e) => {
-    e.preventDefault();
-    if (gs.current) gs.current.player.vx = 0;
-  };
-
   return (
-    <div style={{ position: 'relative', lineHeight: 0, fontSize: 0 }}>
+    <div 
+      ref={containerRef}
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#eee8d8'
+      }}
+    >
       <canvas
         ref={canvasRef}
-        className="hj-canvas"
         width={GAME_W}
         height={GAME_H}
-        style={{ cursor: 'none' }}
+        style={{
+          width: 'auto',
+          height: '100%',
+          maxWidth: '100%',
+          objectFit: 'contain',
+          cursor: 'none',
+          touchAction: 'none'
+        }}
       />
-
-      <div className="hj-mobile-controls">
-        <button
-          className="hj-arrow-btn"
-          onTouchStart={handleTouchStartLeft}
-          onTouchEnd={handleTouchEnd}
-          onTouchCancel={handleTouchEnd}
-          onTouchLeave={handleTouchEnd}
-          onMouseDown={handleMouseDownLeft}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-        >
-          ◀
-        </button>
-        <button
-          className="hj-arrow-btn"
-          onTouchStart={handleTouchStartRight}
-          onTouchEnd={handleTouchEnd}
-          onTouchCancel={handleTouchEnd}
-          onTouchLeave={handleTouchEnd}
-          onMouseDown={handleMouseDownRight}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-        >
-          ▶
-        </button>
-      </div>
     </div>
   );
 };

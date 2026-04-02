@@ -59,11 +59,6 @@ function App() {
               currentScore={currentScore}
             />
           ) : (
-            /*
-             * DoodleCanvas kendi wrapper'ını içinde taşıyor (wrapperRef).
-             * Burada sadece border/shadow için ince bir kılıf yeterli —
-             * padding veya min-height OLMAMALI, canvas boyutu belirlesin.
-             */
             <div className="hj-canvas-shell">
               <DoodleCanvas onGameOver={handleGameOver} />
             </div>

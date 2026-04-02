@@ -383,7 +383,7 @@ const DoodleCanvas = ({ onGameOver }) => {
       animId = requestAnimationFrame(loop);
     };
 
-    // ── DOKUNMATİK KONTROL ─────────────────────────────────────────────
+    // Dokunarak Kontrol
     const handleTouchStart = (e) => {
       e.preventDefault();
       touchState.current.isTouching = true;

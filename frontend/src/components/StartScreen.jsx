@@ -26,7 +26,6 @@ const StartScreen = ({ onStart, currentScore }) => (
       color: '#666',
     }}>
       A-D yada ok tuşlarıyla sağa sola hareket et!
-      Telefondaysan sağa sola yatır!
     </p>
     {currentScore !== null && (
       <p style={{

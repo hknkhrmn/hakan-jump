@@ -1,10 +1,10 @@
 import React, { useRef, useEffect } from 'react';
 import { bgMusic, bounceSound, fallSound } from '../utils/audio';
 
-// Koordinata küçük rastgele sapma eklendi  el çizimi hissi için
+// Koordinata küçük rastgele sapma ekle — el çizimi hissi için
 const jitter = (n, a = 1.8) => n + (Math.random() - 0.5) * a;
 
-// Hafif yamuk handmane dikdörtgen görünüm 
+// Hafif yamuk (handmade görünümlü) dikdörtgen çiz
 const wobblyRect = (ctx, x, y, w, h, stroke, fill) => {
   ctx.save();
   ctx.strokeStyle = stroke;
@@ -29,7 +29,7 @@ const PLAT_COLORS = {
   cracked: { stroke: '#6b6b6b', fill: '#d6d6d6' }, // gri — bir kez kullanılabilir
 };
 
-// Oyun koordinat uzayı 
+// Oyun koordinat uzayı — CSS boyutundan bağımsız, sabit
 const GAME_W = 350;
 const GAME_H = 550;
 
@@ -47,27 +47,11 @@ const getCharIndex = (score) => {
   return 0;
 };
 
-// Gyroscope desteği var mı kontrol et
-const hasGyroscope = () => window.DeviceOrientationEvent !== undefined;
-
-// iOS 13+'da gyroscope için kullanıcı izni gerekiyor
-const requestGyroPermission = async () => {
-  if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-    try {
-      const permission = await DeviceOrientationEvent.requestPermission();
-      return permission === 'granted';
-    } catch {
-      return false;
-    }
-  }
-  return true; // Android ve masaüstü — izin gerekmez
-};
-
 const DoodleCanvas = ({ onGameOver }) => {
   const canvasRef = useRef(null);
 
   // Oyun state'i ref'te tutulur — her frame değiştiği için useState kullanmak
-  // gereksiz render'a yol açar, useRef ile React'tan bağımsız yaptık
+  // gereksiz render'a yol açar, useRef ile React'tan bağımsız tutulur
   const gs = useRef({
     player: { x: 135, y: 420, w: 75, h: 75, vy: 0, vx: 0 }, // vx: yatay hız
     platforms: [],
@@ -112,7 +96,7 @@ const DoodleCanvas = ({ onGameOver }) => {
       return img;
     });
 
-    // Platform tipi havuzu  normal ağırlıklı dağılım
+    // Platform tipi havuzu — normal ağırlıklı dağılım
     const TYPES    = ['normal', 'normal', 'normal', 'spring', 'cracked'];
     const makePlat = (x, y) => ({
       x, y,
@@ -121,7 +105,7 @@ const DoodleCanvas = ({ onGameOver }) => {
       type: TYPES[Math.floor(Math.random() * TYPES.length)],
     });
 
-    // Oyunu başa sıfırla  yeni oyun veya ölüm sonrası
+    // Oyunu başa sıfırla — yeni oyun veya ölüm sonrası
     const reset = () => {
       gs.current.score       = 0;
       gs.current.dead        = false;
@@ -152,12 +136,12 @@ const DoodleCanvas = ({ onGameOver }) => {
       }
     };
 
-    // Platform çiz 
+    // Platform çiz — tipine göre ek detay ekle
     const drawPlat = (p) => {
       const { stroke, fill } = PLAT_COLORS[p.type];
       wobblyRect(ctx, p.x, p.y, p.w, p.h, stroke, fill);
 
-      // Spring platformu  üstüne yay işareti ekle
+      // Spring platformu: üstüne yay işareti ekle
       if (p.type === 'spring') {
         ctx.save();
         ctx.strokeStyle = '#9b2226';
@@ -173,7 +157,7 @@ const DoodleCanvas = ({ onGameOver }) => {
         ctx.restore();
       }
 
-      // Cracked platform  üstüne çatlak çizgileri ekle
+      // Cracked platform: üstüne çatlak çizgileri ekle
       if (p.type === 'cracked') {
         ctx.save();
         ctx.strokeStyle = '#888';
@@ -186,7 +170,7 @@ const DoodleCanvas = ({ onGameOver }) => {
       }
     };
 
-    // Oyuncuyu çiz  aktif karakterin SVG görseli, yüklenmediyse fallback daire
+    // Oyuncuyu çiz — aktif karakterin SVG görseli, yüklenmediyse fallback daire
     const drawPlayer = (p) => {
       const img = imgs[gs.current.charIndex];
       if (img.complete && img.naturalWidth > 0) {
@@ -261,14 +245,7 @@ const DoodleCanvas = ({ onGameOver }) => {
     };
 
     // Arka plan müziğini başlat — zaten çalıyorsa başa sar
-    // iOS'ta ses çalabilmek için kullanıcı etkileşimi gerekir
-    //  gyroscope izni istenir
     const startBgMusic = async () => {
-      // iOS gyroscope izni  kullanıcı etkileşimi anında iste
-      if (hasGyroscope()) {
-        await requestGyroPermission();
-      }
-
       if (bgMusic.paused) {
         bgMusic.currentTime = 0;
         bgMusic.play().catch(e => console.warn('Müzik başlatılamadı:', e));
@@ -277,7 +254,7 @@ const DoodleCanvas = ({ onGameOver }) => {
       }
     };
 
-    // ana oyun döngüsü
+    // ── Ana oyun döngüsü ──────────────────────────────────────────────────────
     let animId;
     const loop = () => {
       const { player: p, platforms } = gs.current;
@@ -378,9 +355,9 @@ const DoodleCanvas = ({ onGameOver }) => {
       animId = requestAnimationFrame(loop); // sonraki frame'i planla
     };
 
-    // Kontroller
+    // ── KONTROLLER ────────────────────────────────────────────────────────────
 
-    // Masaüstü klavye kontrolü
+    // Masaüstü: klavye kontrolü
     // A / ArrowLeft → sola, D / ArrowRight → sağa, tuş bırakılınca dur
     const onKeyDown = (e) => {
       if (e.key === 'ArrowLeft'  || e.key === 'a') gs.current.player.vx = -5;
@@ -388,29 +365,11 @@ const DoodleCanvas = ({ onGameOver }) => {
     };
     const onKeyUp = (e) => {
       if (['ArrowLeft', 'ArrowRight', 'a', 'd'].includes(e.key)) {
-        gs.current.player.vx = 0; // tuş bırakılınca dur
+        gs.current.player.vx = 0;
       }
     };
 
-    // Mobil gyroscope kontrolü
-    // e.gamma: telefon yatay eğimi, -90 (sol) ile +90 (sağ) arası
-    // 0.25 hassasiyet katsayısı — çok hızlı veya çok yavaş hissedirse ayarla
-    const onGyro = (e) => {
-      if (gs.current.dead) return;
-      const tilt = e.gamma ?? 0;           // null gelirse 0 kullan
-      gs.current.player.vx = tilt * 0.25; // eğim açısını hıza çevir
-    };
-
-    // Mobil fallback gyroscope yoksa ekrana dokunarak yön ver
-    // Sol yarıya dokunursa sola, sağ yarıya dokunursa sağa gider
-    const onTouch = (e) => {
-      const rect   = canvas.getBoundingClientRect();
-      const touchX = (e.touches[0].clientX - rect.left) / rect.width * GAME_W;
-      gs.current.player.vx = touchX < GAME_W / 2 ? -5 : 5;
-    };
-    const onTouchEnd = () => { gs.current.player.vx = 0; }; // parmak kalkınca dur
-
-    // Click oyun bittikten sonra yeniden başlat
+    // Click: oyun bittikten sonra yeniden başlat
     const onClick = async () => {
       if (gs.current.dead) {
         reset();
@@ -419,24 +378,17 @@ const DoodleCanvas = ({ onGameOver }) => {
       }
     };
 
-    // Listenerlar bağlandı
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup',   onKeyUp);
-    window.addEventListener('deviceorientation', onGyro); // gyroscope
-    canvas.addEventListener('touchmove',  onTouch,    { passive: true });
-    canvas.addEventListener('touchend',   onTouchEnd, { passive: true });
     canvas.addEventListener('click', onClick);
 
-    startBgMusic(); // oyun başlayınca müziği ve gyroscope iznini başlat
+    startBgMusic();
     loop();
 
-    // Component unmount olunca temizlik yap bellek sızıntısı önle
+    // Component unmount olunca temizlik yap — bellek sızıntısı önle
     return () => {
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup',   onKeyUp);
-      window.removeEventListener('deviceorientation', onGyro);
-      canvas.removeEventListener('touchmove',  onTouch);
-      canvas.removeEventListener('touchend',   onTouchEnd);
       canvas.removeEventListener('click', onClick);
       cancelAnimationFrame(animId);
       bgMusic.pause();
@@ -444,15 +396,35 @@ const DoodleCanvas = ({ onGameOver }) => {
   }, [onGameOver]);
 
   return (
-    // Boyutlandırma tamamen CSS'e bırakıldı (.hj-canvas)
-    // width/height attribute'ları oyun koordinat uzayını tanımlar
-    <canvas
-      ref={canvasRef}
-      className="hj-canvas"
-      width={GAME_W}
-      height={GAME_H}
-      style={{ cursor: 'none' }}
-    />
+    // Canvas + mobil ok butonları bir arada
+    <div style={{ position: 'relative', lineHeight: 0, fontSize: 0 }}>
+      {/* Oyun alanı — boyutlandırma .hj-canvas ile CSS tarafından yönetilir */}
+      <canvas
+        ref={canvasRef}
+        className="hj-canvas"
+        width={GAME_W}
+        height={GAME_H}
+        style={{ cursor: 'none' }}
+      />
+
+      {/* Mobil ok butonları — sadece dokunmatik ekranda görünür */}
+      <div className="hj-mobile-controls">
+        <button
+          className="hj-arrow-btn"
+          onTouchStart={(e) => { e.preventDefault(); gs.current.player.vx = -5; }}
+          onTouchEnd={(e)   => { e.preventDefault(); gs.current.player.vx =  0; }}
+        >
+          ◀
+        </button>
+        <button
+          className="hj-arrow-btn"
+          onTouchStart={(e) => { e.preventDefault(); gs.current.player.vx =  5; }}
+          onTouchEnd={(e)   => { e.preventDefault(); gs.current.player.vx =  0; }}
+        >
+          ▶
+        </button>
+      </div>
+    </div>
   );
 };
 

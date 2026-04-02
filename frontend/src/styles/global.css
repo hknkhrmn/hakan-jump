@@ -1,5 +1,7 @@
+/* ─── Hakan Jump — Global Styles ─────────────────────────────────────────── */
+
 @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&display=swap');
-/* Sıfırlamamızı yaptık */
+
 *,
 *::before,
 *::after {
@@ -11,10 +13,9 @@
 html, body, #root {
   height: 100%;
   overflow: hidden; /* scroll tamamen kapalı */
-  
 }
 
-/* Sayfa */
+/* ── SAYFA ───────────────────────────────────────────────────────────────── */
 .hj-root {
   height: 100%;
   display: flex;
@@ -29,7 +30,7 @@ html, body, #root {
   );
   font-family: 'Caveat', cursive;
   overflow: hidden;
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 1.5rem;
   gap: 0.75rem;
 }
 
@@ -43,7 +44,7 @@ html, body, #root {
   pointer-events: none;
 }
 
-/*Başlık*/
+/* ── BAŞLIK ──────────────────────────────────────────────────────────────── */
 .hj-header {
   text-align: center;
   flex-shrink: 0;
@@ -67,8 +68,14 @@ html, body, #root {
   transform: rotate(0.5deg);
 }
 
-/*  Ana Layout  */
-
+/* ── ANA LAYOUT ──────────────────────────────────────────────────────────── */
+/*
+ * Strateji:
+ *   - Layout kalan yüksekliği tamamen doldurur (flex: 1)
+ *   - Oyun kartı: canvas'ı barındırır, aspect-ratio canvas tarafından korunur
+ *   - Yan panel: oyun kartının yanında, kendi içinde scroll edebilir
+ *   - Mobilde: oyun üstte tam genişlik, yan panel altında yatay scroll
+ */
 .hj-layout {
   flex: 1;
   min-height: 0;          /* flex child shrink edebilsin */
@@ -76,11 +83,11 @@ html, body, #root {
   flex-direction: row;
   gap: 1rem;
   align-items: flex-start;
+  justify-content: center; /* yatayda ortala */
   overflow: hidden;
-  justify-content: center;
 }
 
-/* Oyun kartı*/
+/* ── OYUN KARTI ──────────────────────────────────────────────────────────── */
 .hj-card {
   background: #faf7f0;
   border: 2px solid #1a1a1a;
@@ -89,14 +96,20 @@ html, body, #root {
   overflow: hidden;
   flex-shrink: 0;
 
-  /*  Kart yüksekliği = layout yüksekliği (tüm boşluğu doldur)*/
-
-  /* Genişlik = yükseklik × (GAME_W / GAME_H) = aspect-ratio ile otomatik */
+  /*
+   * Kart yüksekliği = layout yüksekliği (tüm boşluğu doldur)
+   * Genişlik = yükseklik × (GAME_W / GAME_H) = aspect-ratio ile otomatik
+   */
   height: 100%;
   width: auto;
   aspect-ratio: 350 / 550;
 }
 
+/*
+ * Canvas: kartı tamamen doldurur.
+ * width:100% + height:100% → aspect-ratio canvas'ın width/height
+ * attribute'larından (350×550) gelir, tarayıcı bunu korur.
+ */
 .hj-canvas {
   display: block;
   width: 100%;
@@ -108,7 +121,7 @@ html, body, #root {
   height: 100%;
 }
 
-/* Yan panel*/
+/* ── YAN PANEL ───────────────────────────────────────────────────────────── */
 .hj-side {
   display: flex;
   flex-direction: column;
@@ -117,11 +130,11 @@ html, body, #root {
   max-width: 240px;
   flex: 1;
   min-height: 0;
-  overflow-y: auto;   
+  overflow-y: auto;   /* panel taşarsa sadece panel içi kayar */
   overflow-x: hidden;
 }
 
-/* Buton */
+/* ── BUTON ───────────────────────────────────────────────────────────────── */
 .hj-btn {
   font-family: 'Caveat', cursive;
   font-size: 20px;
@@ -140,7 +153,7 @@ html, body, #root {
 .hj-btn:hover  { transform: rotate(-0.8deg) translateY(-2px); box-shadow: 3px 5px 0 #1a1a1a; }
 .hj-btn:active { transform: rotate(-0.8deg) translateY(1px);  box-shadow: 2px 2px 0 #1a1a1a; }
 
-/* Skor kartı*/
+/* ── SKOR KARTI ──────────────────────────────────────────────────────────── */
 .hj-score-card {
   background: #faf7f0;
   border: 2px solid #1a1a1a;
@@ -165,7 +178,7 @@ html, body, #root {
 
 .hj-score-val.accent { color: #2d6a4f; }
 
-/* Lider tablosu */
+/* ── LİDER TABLOSU ───────────────────────────────────────────────────────── */
 .hj-lb {
   background: #faf7f0;
   border: 2px solid #1a1a1a;
@@ -221,8 +234,12 @@ html, body, #root {
   margin-left: 4px;
 }
 
-/* Mobil düzenlemeler*/
-
+/* ── MOBİL ───────────────────────────────────────────────────────────────── */
+/*
+ * Dar ekran (telefon):
+ *   - Layout dikey: oyun üstte, panel altta yatay scrollable şerit
+ *   - Oyun kartı genişliği = ekran genişliği, yükseklik aspect-ratio'dan
+ */
 @media (max-width: 600px) {
   .hj-root {
     padding: 0.5rem 0.5rem;
@@ -240,12 +257,12 @@ html, body, #root {
   /* Oyun kartı: tam genişlik, yükseklik aspect-ratio'dan otomatik */
   .hj-card {
     width: 100%;
-    height: auto;       
+    height: auto;        /* yüksekliği aspect-ratio belirlesin */
     aspect-ratio: 350 / 550;
     flex-shrink: 0;
   }
 
-  /* Alt şerit  skor + leaderboard yan yana, yatay scroll */
+  /* Alt şerit: skor + leaderboard yan yana, yatay scroll */
   .hj-side {
     flex-direction: row;
     max-width: 100%;
@@ -253,7 +270,7 @@ html, body, #root {
     overflow-x: auto;
     overflow-y: hidden;
     flex-shrink: 0;
-    padding-bottom: 4px; 
+    padding-bottom: 4px; /* scrollbar için nefes */
   }
 
   .hj-score-card {
@@ -264,5 +281,44 @@ html, body, #root {
   .hj-lb {
     flex-shrink: 0;
     min-width: 200px;
+  }
+}
+
+/* ── MOBİL OK BUTONLARI ─────────────────────────────────────────────────── */
+/* Sadece dokunmatik cihazlarda görünür, masaüstünde gizlenir */
+.hj-mobile-controls {
+  display: none;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .hj-mobile-controls {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 12px;
+    background: #faf7f0;
+    border-top: 2px solid #1a1a1a;
+  }
+
+  .hj-arrow-btn {
+    flex: 1;
+    font-size: 28px;
+    font-family: 'Caveat', cursive;
+    color: #1a1a1a;
+    background: #eee8d8;
+    border: 2px solid #1a1a1a;
+    border-radius: 3px;
+    padding: 10px 0;
+    cursor: pointer;
+    box-shadow: 2px 2px 0 #c8c0b0;
+    /* Dokunma sırasında tarayıcı vurgulamasını kapat */
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  .hj-arrow-btn:active {
+    background: #d4cfc4;
+    box-shadow: 1px 1px 0 #c8c0b0;
+    transform: translateY(1px);
   }
 }

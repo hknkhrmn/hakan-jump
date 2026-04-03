@@ -247,13 +247,13 @@ const DoodleCanvas = ({ onGameOver }) => {
     const loop = () => {
       const { player: p, platforms } = gs.current;
 
-      // --- DELTA TIME HESAPLAMA ---
+      // DELTA time hesaplama
       const now = performance.now();
       const deltaTime = (now - gs.current.lastTime) / 1000;
       gs.current.lastTime = now;
-      const dt = Math.min(deltaTime, 0.1); // Sekme değişiminde fırlamayı önle
-      const timeStep = dt * 60; // 60 FPS bazlı katsayı
-      // ----------------------------
+      const dt = Math.min(deltaTime, 0.1); 
+      const timeStep = dt * 60; 
+      
 
       p.x += p.vx * timeStep;
       p.vy += (isMobile ? 0.12 : 0.22) * timeStep;

@@ -70,6 +70,9 @@ hakan-jump/
 
 ## 🚀 Kurulum
 
+Oyunu bu linkten oynayabilirsiniz. → [https://hakan-jump-1.onrender.com](https://hakan-jump-1.onrender.com)
+
+
 ### Gereksinimler
 
 - Node.js v18+
@@ -115,9 +118,6 @@ Tarayıcıdan aç → [http://localhost:5173](http://localhost:5173)
 - `A` / `←` → sola git
 - `D` / `→` → sağa git
 
-**Mobil**
-- Telefonu sağa / sola eğ (gyroscope)
-- Gyroscope yoksa ekranın sol / sağ yarısına dokun
 
 **Platform tipleri**
 - 🟩 Yeşil → standart zıplama
